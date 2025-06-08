@@ -1,7 +1,7 @@
 import cv2
 import time
 
-class Cap_Pict:
+class Cap_Data:
     def __init__(self):
         self.mode = 0
         self.cap = cv2.VideoCapture(0)
@@ -18,34 +18,34 @@ class Cap_Pict:
         return 1000 * time.time()   
 
 if __name__=="__main__":
-    capPict = Cap_Pict()
+    capData = Cap_Data()
     keep = time.time()
     print("Waiting for 10 sec...")
     while 1:
-        pict = capPict.capture()
+        pict = capData.capture()
         cv2.imshow("window",pict)
         key = cv2.waitKey(1) 
         if key == 27: break
         if time.time() > keep + 10: break
     print("--- Start ---")
-    count = capPict.begin
+    count = capData.begin
     keep = time.time()
-    if capPict.mode == 0:
+    if capData.mode == 0:
         while 1:
-            pict = capPict.capture()
+            pict = capData.capture()
             cv2.imshow("window",pict)
             key = cv2.waitKey(1) 
             if key == 27: break
-            if time.time() > keep + capPict.interval:
+            if time.time() > keep + capData.interval:
                 filename = "data/img_%03d.png" % count
                 cv2.imwrite(filename,pict)
                 print("captured: %03d" %count)
                 count += 1
                 keep = time.time()
-            if count == capPict.end + 1: break
+            if count == capData.end + 1: break
     else:
         while 1:
-            pict = capPict.capture()
+            pict = capData.capture()
             cv2.imshow("window",pict)
             key = cv2.waitKey(1)
             if key == 27: break

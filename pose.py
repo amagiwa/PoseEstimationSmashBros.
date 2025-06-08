@@ -1,8 +1,11 @@
+# From Python
+# It requires OpenCV installed for Python
 import sys
 import cv2
 import os
+from sys import platform
 import argparse
-import numpy as np
+import time
 
 try:
     # Import Openpose (Windows/Ubuntu/OSX)
@@ -39,6 +42,7 @@ try:
             key = curr_item.replace('-','')
             if key not in params: params[key] = next_item
 
+    # ここまでテンプレ
     # Construct it from system arguments
     # op.init_argv(args[1])
     # oppython = op.OpenposePython()
@@ -51,59 +55,29 @@ except Exception as e:
     print(e)
     sys.exit(-1)
 
-class Ex_Feat:
+class Pose:
     def __init__(self):
-        self.rng = 400
-        self.n_bin = 16
-
-    def subVec2(self,vo,vt):
-        v = np.zeros(2)
-        v[0] = vt[0] - vo[0]
-        v[1] = vt[1] - vo[1]
-        return v
-    
-    def vec2Rad(self,vec):
-        rad = np.arctan(vec[1]/(vec[0]+0.001))
-        return rad
-    
-    def rad2Bin(self,rad):
-        rBin = np.pi/self.n_bin
-        rad /= rBin
-        rad = int(rad)
-        return rad
-    
-    def vec2Bin(self,vec):
-        rad = self.vec2Rad(vec)
-        return self.rad2Bin(rad)
-
-    def compute(self,camKp):
-        f = []
-        for i in range(len(camKp)):
-            for j in range(len(camKp)):
-                v = self.subVec2(camKp[i],camKp[j])
-                f.append(self.vec2Bin(v))
-        return np.array(f)
-
-    def describe(self,filename):
-        img = cv2.imread(filename,cv2.IMREAD_COLOR)
-        datum = op.Datum()
-        datum.cvInputData = img
-        opWrapper.emplaceAndPop(op.VectorDatum([datum]))
-        return self.compute(datum.poseKeypoints[0])
-    
-if __name__=="__main__":
-    ex_feat = Ex_Feat()
-    features = []
-    for i in range(1,ex_feat.rng+1):
-        filename = "data/img_%03d.png" % i
-        print(filename)
-        vec = ex_feat.describe(filename)
-        features.append(vec)
-    for i in range(9901, 10000+1):
-        filename = "data/img_%03d.png" % i
-        print(filename)
-        vec = ex_feat.describe(filename)
-        features.append(vec)
-    X_train = np.array(features)
-    outFilename = "X_train"
-    np.save(outFilename,X_train)
+        # Read frames on camera
+        self.cap = cv2.VideoCapture(0)
+        # Process and display images
+        # 解析結果とfpsを表示
+        self.fps_time = 0
+        
+    def update(self):
+            datum = op.Datum()
+            ret, imageToProcess = self.cap.read()
+            imageToProcess = cv2.flip(imageToProcess, 1)
+            cv2.putText(imageToProcess,
+                "FPS: %f" % (1.0 / (time.time() - self.fps_time)),
+                (10, 10),  cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                (0, 255, 0), 2)
+            datum.cvInputData = imageToProcess
+            opWrapper.emplaceAndPop(op.VectorDatum([datum]))
+            self.fps_time = time.time()
+            #print("Body keypoints: \n" + str(datum.poseKeypoints))
+            if not args[0].no_display:
+                cv2.imshow("OpenPose 1.7.0 - Tutorial Python API", datum.cvOutputData)
+                cv2.waitKey(1)
+            if datum.poseKeypoints is None:
+                return None
+            return datum.poseKeypoints[0]

@@ -1,14 +1,13 @@
-from cam_kp import Cam_Kp
+from pose import Pose
 import cv2
 import numpy as np
-import sklearn
 from sklearn import svm
 import serial
 import time
 
 class Classify:
     def __init__(self):
-        self.cam_kp = Cam_Kp()
+        self.pose = Pose()
         self.n_bin = 16
 
     def subVec2(self,vo,vt):
@@ -54,14 +53,14 @@ if __name__ == "__main__":
     X_train = np.load("X_train.npy")
     y_train = np.load("y_train.npy")
     ser = serial.Serial()
-    ser.port = "COM7"     #デバイスマネージャでArduinoのポート確認
-    ser.baudrate = 9600 #Arduinoと合わせる
-    ser.setDTR(False)     #DTRを常にLOWにしReset阻止
+    ser.port = "COM7"     # デバイスマネージャでArduinoのポート確認
+    ser.baudrate = 9600     # Arduinoと合わせる
+    ser.setDTR(False)     # DTRを常にLOWにしReset阻止
     ser.open()      
     clf = svm.LinearSVC(random_state=0, tol=1e-1, max_iter=3000, C=100)
     clf.fit(X_train, y_train)
     while 1:
-        vec = classify.compute(classify.cam_kp.update())
+        vec = classify.compute(classify.pose.update())
         lbl = clf.predict(vec)
         poss = clf.decision_function(vec)
         print("Decision: ")
