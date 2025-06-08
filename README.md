@@ -5,7 +5,7 @@
 ポーズ分類のための学習データ(教師データ)を予め作成しておき、カメラに映る人物のポーズに基づいてゲーム機に入力します。
 
 # 使い方
-OpenPose(https://github.com/CMU-Perceptual-Computing-Lab/openpose)をビルドし、直下のpythonフォルダでgit cloneします。
+OpenPose (https://github.com/CMU-Perceptual-Computing-Lab/openpose) をビルドし、直下のpythonフォルダでgit cloneします。
 OpenPoseの事前学習済みモデルのダウンロードも忘れないようにしてください。
 
 # プログラムの説明
